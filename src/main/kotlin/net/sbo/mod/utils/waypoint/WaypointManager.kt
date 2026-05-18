@@ -32,6 +32,7 @@ object WaypointManager {
     var guessWp: Waypoint? = null
     private val waypoints = ConcurrentHashMap<String, CopyOnWriteArrayList<Waypoint>>()
     private var lastAutoWarpTarget: AutoWarpTarget? = null
+    private var lastAutoWarpedTargetPos: SboVec? = null
     var closestBurrow: Pair<Waypoint?, Double> = null to 1000.0
     var closestGuess: Pair<Waypoint?, Double> = null to 1000.0
     val rareMobs: List<String> = listOf(
@@ -188,6 +189,7 @@ object WaypointManager {
         removeAllOfType("guess")
         if (!Diana.dontClearArrowGuess) removeAllOfType("arrow")
         lastAutoWarpTarget = null
+        lastAutoWarpedTargetPos = null
     }
 
     fun addRareMobWaypoint(player: String, pos: SboVec, mobName: String, playername: String) {
@@ -440,10 +442,12 @@ object WaypointManager {
 
         val autoWarpTarget = AutoWarpTarget(target.type, target.pos)
         if (lastAutoWarpTarget == autoWarpTarget) return
+        if (lastAutoWarpedTargetPos == target.pos) return
 
         val warp = getClosestWarp(target.pos) ?: return
         if (executeWarpCommand(warp)) {
             lastAutoWarpTarget = autoWarpTarget
+            lastAutoWarpedTargetPos = target.pos
         }
     }
 
