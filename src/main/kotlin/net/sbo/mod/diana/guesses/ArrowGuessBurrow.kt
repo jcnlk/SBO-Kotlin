@@ -2,6 +2,8 @@ package net.sbo.mod.diana.guesses
 
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.phys.AABB
+import net.minecraft.world.InteractionHand
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.core.particles.DustParticleOptions
 import net.minecraft.core.particles.ParticleTypes
@@ -69,6 +71,8 @@ object ArrowGuessBurrow {
     private val locations: MutableSet<SboVec> = Collections.newSetFromMap(ConcurrentHashMap())
 
     private var lastBlockClicked: SboVec? = null
+    private var lastAutoUseSpade: Long = 0
+    private var lastAutoUseSpadeGuess: SboVec? = null
 
     private val allGuesses = CopyOnWriteArrayList<GuessEntry>()
 
@@ -341,8 +345,38 @@ object ArrowGuessBurrow {
         locations.clear()
         findClosestValidBlockToRayNew(arrow, this)?.let {
             WaypointManager.addArrowGuess(it)
+            tryAutoUseSpade(it)
             newArrow = false
         }
         return this
+    }
+
+    private fun tryAutoUseSpade(guess: SboVec) {
+        if (!Diana.autoUseSpade) return
+        if (!Diana.dianaBurrowGuess) return
+        if (World.getWorld() != "Hub") return
+        if (PreciseGuessBurrow.finalLocation == guess) return
+        if (lastAutoUseSpadeGuess == guess && System.currentTimeMillis() - lastAutoUseSpade < 3000) return
+        if (System.currentTimeMillis() - lastAutoUseSpade < 750) return
+
+        val client = SBOKotlin.mc
+        if (client.screen != null) return
+        val player = client.player ?: return
+        val gameMode = client.gameMode ?: return
+        val inventory = player.inventory
+        val spadeSlot = (0..8).firstOrNull { slot ->
+            val stack = inventory.getItem(slot)
+            !stack.isEmpty && stack.hoverName.string.contains("Spade")
+        } ?: return
+
+        if (inventory.selectedSlot != spadeSlot) {
+            inventory.setSelectedSlot(spadeSlot)
+            player.connection.send(ServerboundSetCarriedItemPacket(spadeSlot))
+        }
+
+        lastAutoUseSpade = System.currentTimeMillis()
+        lastAutoUseSpadeGuess = guess
+        gameMode.useItem(player, InteractionHand.MAIN_HAND)
+        player.swing(InteractionHand.MAIN_HAND)
     }
 }

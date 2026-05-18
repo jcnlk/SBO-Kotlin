@@ -106,6 +106,11 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("If enabled, Auto Warp waits for a spade-confirmed burrow guess before warping.")
     }
 
+    var autoUseSpade by boolean(false) {
+        this.name = Literal("Auto Use Spade")
+        this.description = Literal("Automatically switches to an Ancestral Spade and uses it when an arrow guess needs confirmation.")
+    }
+
     var dontWarpIfBurrowClose by boolean(false) {
         this.name = Literal("Don't Warp If a Burrow is nearby")
         this.description = Literal("If enabled, the warp key will not warp you if you are within 60 blocks of a burrow")
