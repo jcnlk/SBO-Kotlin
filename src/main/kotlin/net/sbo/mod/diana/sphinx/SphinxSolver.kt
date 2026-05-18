@@ -25,6 +25,7 @@ object SphinxSolver {
     @SboEvent
     fun onGuiMouseClick(event: GuiMouseClickBefore) {
         if (!Diana.sphinxSolver) return
+        if (Diana.sphinxSolverMode != Diana.SphinxSolverMode.MANUAL) return
 
         val index = currentSession?.correctAnswersIndex ?: return
         if (event.button != 0) return
@@ -43,8 +44,10 @@ object SphinxSolver {
             val questionText = matchResult.group(1).trim()
             for (sphinxQuestion in SphinxQuestions.QUESTIONS) {
                 if (sphinxQuestion.question.equals(questionText.removeFormatting(), ignoreCase = true)) {
-                    Helper.sleep(100) {
-                        Chat.chat("§6[SBO] §bClick anywhere on the screen to answer while the chat is open.")
+                    if (Diana.sphinxSolverMode == Diana.SphinxSolverMode.MANUAL) {
+                        Helper.sleep(100) {
+                            Chat.chat("§6[SBO] §bClick anywhere on the screen to answer while the chat is open.")
+                        }
                     }
                 }
             }
@@ -86,6 +89,12 @@ object SphinxSolver {
 
     private fun handleSessionComplete(session: SphinxSession) {
         if (session.correctAnswersIndex == -1) return
+
+        if (Diana.sphinxSolverMode == Diana.SphinxSolverMode.AUTO) {
+            Chat.command("/sphinxanswer ${session.correctAnswersIndex}")
+            currentSession = null
+            return
+        }
 
         for (msg in session.answerTexts.values) {
             val clickableText = msg.toClickableText("/sphinxanswer ${session.correctAnswersIndex}")

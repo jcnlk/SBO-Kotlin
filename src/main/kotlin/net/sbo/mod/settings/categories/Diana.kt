@@ -36,6 +36,10 @@ object Diana : CategoryKt("Diana") {
         }
     }
 
+    enum class SphinxSolverMode {
+        AUTO, MANUAL
+    }
+
     enum class Tracker {
         OFF, TOTAL, EVENT, SESSION;
 
@@ -501,5 +505,10 @@ object Diana : CategoryKt("Diana") {
     var sphinxSolver by boolean(true) {
         this.name = Literal("Sphinx Solver")
         this.description = Literal("Helps you solve the sphinx riddle by showing you the answer choices in chat and it automatically clicks the correct one for you when you click anywehre while the chat is open.")
+    }
+
+    var sphinxSolverMode by enum(SphinxSolverMode.MANUAL) {
+        this.name = Literal("Sphinx Solver Mode")
+        this.description = Literal("Auto solves the sphinx riddle automatically. Manual keeps the current click-to-answer behavior.")
     }
 }
