@@ -31,6 +31,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents
 object WaypointManager {
     var guessWp: Waypoint? = null
     private val waypoints = ConcurrentHashMap<String, CopyOnWriteArrayList<Waypoint>>()
+    private var lastAutoWarpTarget: AutoWarpTarget? = null
     var closestBurrow: Pair<Waypoint?, Double> = null to 1000.0
     var closestGuess: Pair<Waypoint?, Double> = null to 1000.0
     val rareMobs: List<String> = listOf(
@@ -173,6 +174,8 @@ object WaypointManager {
 
             val shouldLegacyHaveLine = bestGuessWp != null && bestGuessWp.type == "guess" && !bestGuessWp.hidden
             guessWp?.format(rareWp, closestBurrow.second, shouldLegacyHaveLine)
+
+            tryAutoWarp(bestGuessWp, rareWp)
         }
 
         WorldRenderEvents.BEFORE_TRANSLUCENT.register(WaypointRenderer)
@@ -184,6 +187,7 @@ object WaypointManager {
         removeAllOfType("world")
         removeAllOfType("guess")
         if (!Diana.dontClearArrowGuess) removeAllOfType("arrow")
+        lastAutoWarpTarget = null
     }
 
     fun addRareMobWaypoint(player: String, pos: SboVec, mobName: String, playername: String) {
@@ -253,6 +257,13 @@ object WaypointManager {
      */
     fun removeAllOfType(type: String) {
         waypoints[type.lowercase()]?.clear()
+        if (
+            type.equals("rareMob", ignoreCase = true) ||
+            type.equals("guess", ignoreCase = true) ||
+            type.equals("arrow", ignoreCase = true)
+        ) {
+            lastAutoWarpTarget = null
+        }
     }
 
     /**
@@ -293,8 +304,7 @@ object WaypointManager {
         if (pos == null) return
         val exists = getWaypointsOfType("arrow").any { it.pos == pos }
         if (exists) return
-        addWaypoint(
-            Waypoint(
+        val waypoint = Waypoint(
                 text = "Guess",
                 x = pos.x,
                 y = pos.y,
@@ -304,8 +314,8 @@ object WaypointManager {
                 b = 1.0f,
                 ttl = 0,
                 type = "arrow"
-            )
         )
+        addWaypoint(waypoint)
     }
 
     fun removeArrowGuess(pos: SboVec) {
@@ -418,6 +428,25 @@ object WaypointManager {
         return
     }
 
+    private data class AutoWarpTarget(val type: String, val pos: SboVec)
+
+    private fun tryAutoWarp(bestGuess: Waypoint?, rareWaypoints: List<Waypoint>) {
+        if (!Diana.autoWarp) return
+
+        val target = rareWaypoints.maxByOrNull { it.creation } ?: bestGuess ?: return
+        if (target.hidden) return
+        if ((target.type == "guess" || target.type == "arrow") && target.distanceRaw <= Diana.removeGuessDistance) return
+        if (Diana.autoWarpConfirmedGuessOnly && target.type == "arrow") return
+
+        val autoWarpTarget = AutoWarpTarget(target.type, target.pos)
+        if (lastAutoWarpTarget == autoWarpTarget) return
+
+        val warp = getClosestWarp(target.pos) ?: return
+        if (executeWarpCommand(warp)) {
+            lastAutoWarpTarget = autoWarpTarget
+        }
+    }
+
     fun warpToInq() {
         val newestInq = getWaypointsOfType("rareMob").maxByOrNull { it.creation }
         if (newestInq == null) return
@@ -437,16 +466,18 @@ object WaypointManager {
     }
 
     var tryWarp: Boolean = false
-    fun executeWarpCommand(warp: String) {
-        if (!checkDiana()) return
-        if (Diana.warpDelay > 0 && System.currentTimeMillis() - PreciseGuessBurrow.lastGuessTime < Diana.warpDelay) return
+    fun executeWarpCommand(warp: String): Boolean {
+        if (!checkDiana()) return false
+        if (Diana.warpDelay > 0 && System.currentTimeMillis() - PreciseGuessBurrow.lastGuessTime < Diana.warpDelay) return false
         if (warp.isNotEmpty() && !tryWarp) {
             tryWarp = true
             Chat.command("warp $warp")
             sleep(500) {
                 tryWarp = false
             }
+            return true
         }
+        return false
     }
 
     fun findBlock(world: ClientLevel, x: Int, y: Int, z: Int): Int {

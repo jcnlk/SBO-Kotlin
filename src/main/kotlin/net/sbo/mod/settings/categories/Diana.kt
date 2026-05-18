@@ -96,7 +96,17 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Select the warps you want to be able to warp to with the guess and inquisitor warp keys.")
     }
 
-    var dontWarpIfBurrowClose by boolean(true) {
+    var autoWarp by boolean(false) {
+        this.name = Literal("Auto Warp")
+        this.description = Literal("Automatically warps to the best Diana warp when a rare mob or burrow guess should be warped to.")
+    }
+
+    var autoWarpConfirmedGuessOnly by boolean(false) {
+        this.name = Literal("Auto Warp Confirmed Guess Only")
+        this.description = Literal("If enabled, Auto Warp waits for a spade-confirmed burrow guess before warping.")
+    }
+
+    var dontWarpIfBurrowClose by boolean(false) {
         this.name = Literal("Don't Warp If a Burrow is nearby")
         this.description = Literal("If enabled, the warp key will not warp you if you are within 60 blocks of a burrow")
     }
