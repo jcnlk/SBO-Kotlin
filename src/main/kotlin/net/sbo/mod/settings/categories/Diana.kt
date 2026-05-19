@@ -146,7 +146,7 @@ object Diana : CategoryKt("Diana") {
         button {
             title = "Open Past Events"
             text = "Open Past Events"
-            description = "Opens the Past Events menu, allowing you to see your saved trackers for previous Diana events."
+            description = "Opens the Past Events menu, allowing you to see your saved trackers for previous Diana events. You can also open it by typing the /sbopastevents command."
             onClick {
                 mc.schedule {
                     UScreen.displayScreen(PastEventsGui())
@@ -555,11 +555,8 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Helps you solve the sphinx riddle by showing you the answer choices in chat and it automatically clicks the correct one for you when you click anywehre while the chat is open.")
     }
 
-<<<<<<< HEAD
     var sphinxSolverMode by enum(SphinxSolverMode.MANUAL) {
         this.name = Literal("Sphinx Solver Mode")
         this.description = Literal("Auto solves the sphinx riddle automatically. Manual keeps the current click-to-answer behavior.")
     }
-=======
->>>>>>> 320b372 (Update Diana.kt)
 }
