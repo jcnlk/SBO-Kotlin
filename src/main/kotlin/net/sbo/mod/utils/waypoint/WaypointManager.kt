@@ -472,7 +472,7 @@ object WaypointManager {
 
     var tryWarp: Boolean = false
     fun executeWarpCommand(warp: String): Boolean {
-        if (World.getWorld() != "Hub") return false
+        if (World.getWorld() != "Hub" || !Helper.hasSpade) return false
         if (Diana.warpDelay > 0 && System.currentTimeMillis() - PreciseGuessBurrow.lastGuessTime < Diana.warpDelay) return false
         if (warp.isNotEmpty() && !tryWarp) {
             tryWarp = true
