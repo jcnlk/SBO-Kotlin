@@ -126,7 +126,7 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Automatically switches to an Ancestral Spade and uses it when an arrow guess needs confirmation.")
     }
 
-    var showTitleWhenWarpAvailable by boolean(true) {
+    var showTitleWhenWarpAvailable by boolean(false) {
         this.name = Literal("Show Title When Warp Is Available")
         this.description = Literal("If enabled, will show a title when warp is available.")
     }
