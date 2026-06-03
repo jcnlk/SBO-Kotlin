@@ -22,7 +22,7 @@ import gg.essential.elementa.dsl.percent
 import gg.essential.elementa.dsl.pixels
 import gg.essential.elementa.effects.OutlineEffect
 import gg.essential.universal.UKeyboard
-import net.minecraft.util.Util
+import net.sbo.mod.SBOKotlin
 import net.sbo.mod.SBOKotlin.MOD_ID
 import net.sbo.mod.SBOKotlin.mc
 import net.sbo.mod.guis.partyfinder.pages.CustomPage
@@ -1003,7 +1003,7 @@ class PartyFinderGUI : WindowScreen(ElementaVersion.V10) {
         )
             .textHoverEffect(Color(255,255,255,255), Color(50, 50, 255, 200))
             .setTextOnClick {
-                Util.getPlatform().openUri("https://discord.gg/QvM6b9jsJD")
+                SBOKotlin.openInBrowser("https://discord.gg/QvM6b9jsJD")
             }
         stpBtn(discord)
 
@@ -1025,7 +1025,7 @@ class PartyFinderGUI : WindowScreen(ElementaVersion.V10) {
         )
             .textHoverEffect(Color(255,255,255,255), Color(50, 50, 255, 200))
             .setTextOnClick {
-                Util.getPlatform().openUri("https://github.com/SkyblockOverhaul/SBO-Kotlin")
+                SBOKotlin.openInBrowser("https://github.com/SkyblockOverhaul/SBO-Kotlin")
             }
         stpBtn(github)
 
@@ -1047,7 +1047,7 @@ class PartyFinderGUI : WindowScreen(ElementaVersion.V10) {
         )
             .textHoverEffect(Color(255,255,255,255), Color(50, 50, 255, 200))
             .setTextOnClick {
-                Util.getPlatform().openUri("https://www.patreon.com/Skyblock_Overhaul")
+                SBOKotlin.openInBrowser("https://www.patreon.com/Skyblock_Overhaul")
             }
         patreon.textObject.setTextScale(getTextScale())
         patreon.uiObject.addChild(GuiHandler.UILine(

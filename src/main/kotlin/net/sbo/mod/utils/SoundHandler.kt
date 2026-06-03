@@ -7,8 +7,7 @@ import net.minecraft.SharedConstants
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
 import net.minecraft.server.packs.PackType
 import net.minecraft.sounds.SoundEvent
-import net.minecraft.resources.Identifier
-import net.minecraft.IdentifierException
+import net.sbo.mod.SBOKotlin
 import net.sbo.mod.SBOKotlin.MOD_ID
 import net.sbo.mod.SBOKotlin.mc
 import net.sbo.mod.SBOKotlin.logger
@@ -142,8 +141,8 @@ object SoundHandler {
         }
 
         val id = try {
-            Identifier.fromNamespaceAndPath(MOD_ID, safeSound)
-        } catch (invalidIdentifierError: IdentifierException) {
+            SBOKotlin.id(safeSound)
+        } catch (invalidIdentifierError: Exception) {
             Chat.chat("§6[SBO] §cInvalid sound name. Use letters, numbers, _ or -")
             logger.error("Invalid sound ID: $sound", invalidIdentifierError)
             return
