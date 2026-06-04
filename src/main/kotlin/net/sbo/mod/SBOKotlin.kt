@@ -3,6 +3,7 @@ package net.sbo.mod
 import com.teamresourceful.resourcefulconfig.api.client.ResourcefulConfigScreen
 import com.teamresourceful.resourcefulconfig.api.loader.Configurator
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.IdentifierException
 import net.minecraft.Util
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.components.toasts.SystemToast
@@ -69,6 +70,15 @@ object SBOKotlin : ClientModInitializer {
 	lateinit var mcVersion: String
 
 	fun id(path: String, owner: String = MOD_ID): Identifier = Identifier.fromNamespaceAndPath(owner, path)
+
+    fun userSuppliedId(path: String, owner: String = MOD_ID, onInvalid: (IdentifierException) -> Unit): Identifier? {
+        return try {
+            id(path = path, owner = owner)
+        } catch (invalidIdentifierException: IdentifierException) {
+            onInvalid(invalidIdentifierException)
+            null
+        }
+    }
 
     fun toast(title: Component, message: Component) {
         mc.toastManager.addToast(
