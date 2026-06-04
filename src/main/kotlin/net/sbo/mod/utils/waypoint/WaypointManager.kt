@@ -139,7 +139,7 @@ object WaypointManager {
             val rareWp = getWaypointsOfType("rareMob")
             if (Diana.removeRareMobwaypoint) {
                 val rareMobsToRemove = rareWp
-                    .filter { waypoint -> waypoint.distanceToPlayer() < 8.0 }
+                    .filter { waypoint -> waypoint.distanceToPlayer() < 3.0 }
                     .toList()
                 rareMobsToRemove.forEach { waypoint -> removeWaypoint(waypoint) }
             }
@@ -159,7 +159,7 @@ object WaypointManager {
             }
 
             guessWp?.let { wp ->
-                if (wp.distanceToPlayer() < Diana.removeGuessDistance) {
+                if (wp.distanceToPlayer() < Diana.removeGuessDistance || getWaypointsOfType("arrow").any { it.pos.x == wp.pos.x && it.pos.y == wp.pos.y && it.pos.z == wp.pos.z }) {
                     removeWaypoint(wp)
                     guessWp = null
                 }
@@ -196,7 +196,7 @@ object WaypointManager {
         addWaypoint(Waypoint(player, pos.x, pos.y, pos.z, 1.0f, 0.84f, 0.0f, 45, type = "rareMob") )
     }
 
-    fun onLootshare() {
+    fun removeNearbyRareMobWaypoints() {
         removeWithinDistance("rareMob", 30)
     }
 
