@@ -74,7 +74,7 @@ object SBOKotlin : ClientModInitializer {
     fun userSuppliedId(path: String, owner: String = MOD_ID, onInvalid: (IdentifierException) -> Unit): Identifier? {
         return try {
             id(path = path, owner = owner)
-        } catch (invalidIdentifierException: ResourceLocationException) {
+        } catch (invalidIdentifierException: IdentifierException) {
             onInvalid(invalidIdentifierException)
             null
         }

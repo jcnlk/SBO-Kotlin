@@ -1,7 +1,6 @@
 package net.sbo.mod.utils
 
 import net.sbo.mod.utils.data.SboDataObject
-
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.SharedConstants
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
