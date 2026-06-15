@@ -1,6 +1,5 @@
 package net.sbo.mod.utils
 
-import net.sbo.mod.utils.data.SboDataObject
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.SharedConstants
 import net.minecraft.client.resources.sounds.SimpleSoundInstance
@@ -11,6 +10,7 @@ import net.sbo.mod.SBOKotlin.MOD_ID
 import net.sbo.mod.SBOKotlin.mc
 import net.sbo.mod.SBOKotlin.logger
 import net.sbo.mod.utils.chat.Chat
+import net.sbo.mod.utils.data.SboDataObject
 import java.io.File
 
 object SoundHandler {
