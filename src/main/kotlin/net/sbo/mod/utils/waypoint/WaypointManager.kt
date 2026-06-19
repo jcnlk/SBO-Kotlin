@@ -223,7 +223,7 @@ object WaypointManager {
     fun onWorldChange(event: WorldChangeEvent) {
         removeAllOfType("world")
         removeAllOfType("guess")
-        if (!Diana.dontClearArrowGuess) removeAllOfType("arrow")
+        removeAllOfType("arrow")
         lastAutoWarpTarget = null
         lastAutoWarpedTargetPos = null
     }
@@ -349,14 +349,15 @@ object WaypointManager {
         if (pos == null) return
         val exists = getWaypointsOfType("arrow").any { it.pos.roundLocationToBlock() == pos.roundLocationToBlock() }
         if (exists) return
-        val waypoint = Waypoint(
+        addWaypoint(
+            Waypoint(
                 text = "Guess",
                 x = pos.x,
                 y = pos.y,
                 z = pos.z,
                 type = "arrow"
+            )
         )
-        addWaypoint(waypoint)
     }
 
     fun removeArrowGuess(pos: SboVec) {
@@ -493,7 +494,7 @@ object WaypointManager {
 
         val target = rareWaypoints.maxByOrNull { it.creation } ?: bestGuess ?: return
         if (target.hidden) return
-        if ((target.type == "guess" || target.type == "arrow") && target.distanceRaw <= Diana.removeGuessDistance) return
+        if ((target.type == "guess" || target.type == "arrow") && target.distanceRaw <= 3.0) return
         if (Diana.autoWarpConfirmedGuessOnly && target.type == "arrow") return
 
         val autoWarpTarget = AutoWarpTarget(target.type, target.pos)

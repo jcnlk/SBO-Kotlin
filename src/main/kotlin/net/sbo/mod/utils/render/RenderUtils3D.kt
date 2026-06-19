@@ -374,17 +374,6 @@ object RenderUtils3D {
         matrix.pushPop(function)
     }
 
-    private fun PoseStack.withLineWidth(lineWidth: Float, function: PoseStack.() -> Unit) {
-        //#if MC > 1.21.10
-        //$$ function()
-        //#else
-        val prevLineWidth = RenderSystem.getShaderLineWidth()
-        RenderSystem.lineWidth(lineWidth)
-        function()
-        RenderSystem.lineWidth(prevLineWidth)
-        //#endif
-    }
-
     private fun PoseStack.pushPop(function: PoseStack.() -> Unit) {
         this.pushPose()
         function()

@@ -344,7 +344,6 @@ object ArrowGuessBurrow {
         findClosestValidBlockToRayNew(arrow, this)?.let {
             WaypointManager.addArrowGuess(it)
             tryAutoUseSpade(it)
-            newArrow = false
         }
 
         return this
@@ -352,7 +351,6 @@ object ArrowGuessBurrow {
 
     private fun tryAutoUseSpade(guess: SboVec) {
         if (!Diana.autoUseSpade) return
-        if (!Diana.dianaBurrowGuess) return
         if (World.getWorld() != "Hub") return
         if (PreciseGuessBurrow.finalLocation == guess) return
         if (lastAutoUseSpadeGuess == guess && System.currentTimeMillis() - lastAutoUseSpade < 3000) return
