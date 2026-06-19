@@ -341,6 +341,7 @@ object WaypointManager {
 
         if (!waypointExists("burrow", pos).first) {
             val waypoint = Waypoint("Guess", pos.x, pos.y, pos.z, type = "guess")
+            waypoint.confirmedBySpade = true
             addWaypoint(waypoint)
         }
     }
@@ -495,7 +496,7 @@ object WaypointManager {
         val target = rareWaypoints.maxByOrNull { it.creation } ?: bestGuess ?: return
         if (target.hidden) return
         if ((target.type == "guess" || target.type == "arrow") && target.distanceRaw <= 3.0) return
-        if (Diana.autoWarpConfirmedGuessOnly && target.type == "arrow") return
+        if (Diana.autoWarpConfirmedGuessOnly && target.type == "arrow" && !target.confirmedBySpade) return
 
         val autoWarpTarget = AutoWarpTarget(target.type, target.pos)
         if (lastAutoWarpTarget == autoWarpTarget) return
