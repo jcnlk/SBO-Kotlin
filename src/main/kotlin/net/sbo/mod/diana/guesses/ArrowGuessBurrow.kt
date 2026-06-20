@@ -251,8 +251,10 @@ object ArrowGuessBurrow {
             allGuesses.add(GuessEntry(withinRange))
         }
 
-        if (Diana.showTitleWhenInaccurate) {
-            if (withinRange.size > 1) {
+        val withinRangeFirst = withinRange.getOrNull(0)
+
+        if (Diana.showTitleWhenFailure) {
+            if (withinRangeFirst == null) {
                 if (!spadeTitleShown) BurrowDetector.requestSpade()
                 spadeTitleShown = true
             } else {
@@ -260,7 +262,7 @@ object ArrowGuessBurrow {
             }
         }
 
-        return withinRange.getOrNull(0)
+        return withinRangeFirst
     }
 
     private fun checkMoveGuess() {
