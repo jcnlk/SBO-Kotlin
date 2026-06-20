@@ -481,7 +481,6 @@ object WaypointManager {
 
     fun warpToGuess() {
         val bestGuess = getBestGuess() ?: return
-        if (bestGuess.hidden) return
         getClosestWarp(bestGuess.pos)?.let {
             executeWarpCommand(it)
         } ?:
