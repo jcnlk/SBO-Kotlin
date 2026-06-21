@@ -163,6 +163,16 @@ object RenderUtils3D {
         lineWidth: Float,
         alpha: Float = 0.5f
     ) {
+        drawTracer(context, target.center().toVec3d().add(0.0, 0.5, 0.0), color, lineWidth, alpha)
+    }
+
+    fun drawTracer(
+        context: WorldRenderContext,
+        target: Vec3,
+        color: FloatArray,
+        lineWidth: Float,
+        alpha: Float = 0.5f
+    ) {
         context.pushPop {
             val camera = context.getCamera()
             val cameraPos = camera.position()
@@ -171,7 +181,7 @@ object RenderUtils3D {
 
             val consumers = context.consumers()
             val startPos = cameraPos.add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()))
-            val endPos = target.center().toVec3d().add(0.0, 0.5, 0.0)
+            val endPos = target
 
             val lineDir = endPos.subtract(startPos)
             val viewDir = startPos.subtract(cameraPos)
