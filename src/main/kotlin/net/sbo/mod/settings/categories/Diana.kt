@@ -479,10 +479,20 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Highlights rare mobs (King, Manti, Sphinx, Inq) with a glowing effect")
     }
 
+    var HighlightDepthCheck by boolean(true) {
+        this.name = Literal("Highlight Depth Check")
+        this.description = Literal("Only highlights rare mobs when they are visible. Disable to see the glow through walls")
+    }
+
+    var RareMobTracers by boolean(false) {
+        this.name = Literal("Rare Mob Tracers")
+        this.description = Literal("Draws tracer lines to rare mobs (King, Manti, Sphinx, Inq)")
+    }
+
     var HighlightColor by color(
         Color(0.0f, 0.964f, 1.0f).rgb) {
         this.name = Literal("Highlight Color")
-        this.description = Literal("Color for the rare mob highlight effect")
+        this.description = Literal("Color for the rare mob highlight and tracer effects")
         this.allowAlpha = true
     }
 
