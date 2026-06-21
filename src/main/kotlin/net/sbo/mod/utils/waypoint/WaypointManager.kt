@@ -19,8 +19,9 @@ import net.sbo.mod.utils.Player
 import net.sbo.mod.utils.SoundHandler.playCustomSound
 import net.sbo.mod.utils.chat.Chat
 import net.sbo.mod.utils.events.Register
-import net.sbo.mod.utils.events.annotations.SboEvent
-import net.sbo.mod.utils.events.impl.game.WorldChangeEvent
+import net.sbo.mod.utils.events.SBOEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
 import net.sbo.mod.utils.game.World
 import net.sbo.mod.utils.math.SboVec
 import net.sbo.mod.utils.render.WaypointRenderer
@@ -32,8 +33,6 @@ import kotlin.math.roundToInt
 
 object WaypointManager {
     private val waypoints = ConcurrentHashMap<String, CopyOnWriteArrayList<Waypoint>>()
-    private var lastAutoWarpTarget: AutoWarpTarget? = null
-    private var lastAutoWarpedTargetPos: SboVec? = null
     var closestWaypoint: Pair<Waypoint?, Double> = null to 1000.0
     val rareMobs: Set<String> = setOf(
         "minos inquisitor",
@@ -220,19 +219,9 @@ object WaypointManager {
                 waypoint.isClosest = waypoint == bestGuessWp
                 waypoint.format(rareWp)
             }
-            tryAutoWarp(bestGuessWp, rareWp)
         }
 
         WorldRenderEvents.BEFORE_TRANSLUCENT.register(WaypointRenderer)
-    }
-
-    @SboEvent
-    fun onWorldChange(event: WorldChangeEvent) {
-        removeAllOfType("world")
-        removeAllOfType("guess")
-        removeAllOfType("arrow")
-        lastAutoWarpTarget = null
-        lastAutoWarpedTargetPos = null
     }
 
     fun addRareMobWaypoint(player: String, pos: SboVec, mobName: String, playername: String) {
@@ -242,7 +231,9 @@ object WaypointManager {
             "manticore" -> if (hideOwnWaypoints.contains(HideOwnWaypoints.MANTICORE) && player.contains(playername)) return
             "sphinx" -> if (hideOwnWaypoints.contains(HideOwnWaypoints.SPHINX) && player.contains(playername)) return
         }
-        addWaypoint(Waypoint(player, pos.x, pos.y, pos.z, ttl = 45, type = "rareMob"))
+        val waypoint = Waypoint(player, pos.x, pos.y, pos.z, ttl = 45, type = "rareMob")
+        addWaypoint(waypoint)
+        SBOEvent.emit(DianaTargetDetectedEvent(DianaTargetSource.RARE_MOB, waypoint.pos))
     }
 
     fun removeNearbyRareMobWaypoints() {
@@ -320,13 +311,6 @@ object WaypointManager {
      */
     fun removeAllOfType(type: String) {
         waypoints[type.lowercase()]?.clear()
-        if (
-            type.equals("rareMob", ignoreCase = true) ||
-            type.equals("guess", ignoreCase = true) ||
-            type.equals("arrow", ignoreCase = true)
-        ) {
-            lastAutoWarpTarget = null
-        }
     }
 
     /**
@@ -348,7 +332,6 @@ object WaypointManager {
 
         if (!waypointExists("burrow", pos).first) {
             val waypoint = Waypoint("Guess", pos.x, pos.y, pos.z, type = "guess")
-            waypoint.confirmedBySpade = true
             addWaypoint(waypoint)
         }
     }
@@ -492,27 +475,6 @@ object WaypointManager {
         getClosestWarp(bestGuess.pos)?.let { executeWarpCommand(it) } ?: return
     }
 
-    private data class AutoWarpTarget(val type: String, val pos: SboVec)
-
-    private fun tryAutoWarp(bestGuess: Waypoint?, rareWaypoints: List<Waypoint>) {
-        if (!Diana.autoWarp) return
-
-        val target = rareWaypoints.maxByOrNull { it.creationNs } ?: bestGuess ?: return
-        if (target.hidden) return
-        if ((target.type == "guess" || target.type == "arrow") && target.distanceRaw <= 3.0) return
-        if (Diana.autoWarpConfirmedGuessOnly && target.type == "arrow" && !target.confirmedBySpade) return
-
-        val autoWarpTarget = AutoWarpTarget(target.type, target.pos)
-        if (lastAutoWarpTarget == autoWarpTarget) return
-        if (lastAutoWarpedTargetPos == target.pos) return
-
-        val warp = getClosestWarp(target.pos) ?: return
-        if (executeWarpCommand(warp)) {
-            lastAutoWarpTarget = autoWarpTarget
-            lastAutoWarpedTargetPos = target.pos
-        }
-    }
-
     fun warpToInq() {
         val newestInq = getWaypointsOfType("rareMob").maxByOrNull { it.creationNs }
         val newestWorldInq = getWaypointsOfType("world").maxByOrNull { it.creationNs }
@@ -531,8 +493,9 @@ object WaypointManager {
     }
 
     var tryWarp: Boolean = false
-    fun executeWarpCommand(warp: String): Boolean {
-        if (World.getWorld() != "Hub" || !Helper.hasSpade) return false
+
+    fun executeWarpCommand(warp: String) {
+        if (World.getWorld() != "Hub" || !Helper.hasSpade) return
         if (warp.isNotEmpty() && !tryWarp) {
             tryWarp = true
             Chat.command("warp $warp")
@@ -541,9 +504,7 @@ object WaypointManager {
                     tryWarp = false
                 }
             }
-            return true
         }
-        return false
     }
 
     fun findBlock(world: ClientLevel, x: Int, y: Int, z: Int): Int {

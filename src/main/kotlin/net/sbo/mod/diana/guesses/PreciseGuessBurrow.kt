@@ -5,6 +5,9 @@ import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.sbo.mod.SBOKotlin
 import net.sbo.mod.settings.categories.Diana
 import net.sbo.mod.utils.events.annotations.SboEvent
+import net.sbo.mod.utils.events.SBOEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
 import net.sbo.mod.utils.events.impl.game.PlayerInteractEvent
 import net.sbo.mod.utils.events.impl.game.WorldChangeEvent
 import net.sbo.mod.utils.events.impl.packets.PacketReceiveEvent
@@ -55,6 +58,7 @@ object PreciseGuessBurrow {
         finalLocation = guessPosition.down(0.5).roundLocationToBlock()
         finalLocation = guessPosition.down(0.5).roundLocationToBlock()
         WaypointManager.updateGuess(finalLocation)
+        SBOEvent.emit(DianaTargetDetectedEvent(DianaTargetSource.SPADE_GUESS, finalLocation))
         newBurrow = false
     }
 

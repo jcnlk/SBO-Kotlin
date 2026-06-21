@@ -118,14 +118,9 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Automatically warps to the best Diana warp when a rare mob or burrow guess should be warped to.")
     }
 
-    var autoWarpConfirmedGuessOnly by boolean(false) {
-        this.name = Literal("Auto Warp Confirmed Guess Only")
-        this.description = Literal("If enabled, Auto Warp waits for a spade-confirmed burrow guess before warping.")
-    }
-
     var autoUseSpade by boolean(false) {
         this.name = Literal("Auto Use Spade")
-        this.description = Literal("Automatically switches to an Ancestral Spade and uses it when an arrow guess needs confirmation.")
+        this.description = Literal("Uses an Ancestral Spade if the arrow guess fails, matching the same condition as the Use Spade title. If Auto Warp is enabled, it waits briefly for the spade result.")
     }
 
     var showTitleWhenWarpAvailable by boolean(false) {

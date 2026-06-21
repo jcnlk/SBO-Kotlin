@@ -49,14 +49,10 @@ class Waypoint(
     var isClosest = false
     var timesDug = 0
     var userInteractedWith = false
-    var confirmedBySpade = false
     var dynamicOpacity = 0.99f
     var inaccurateArrow = false
 
-    fun hasStrongerStateThan(other: Waypoint): Boolean =
-        this.timesDug > other.timesDug ||
-            (this.userInteractedWith && !other.userInteractedWith) ||
-            (this.confirmedBySpade && !other.confirmedBySpade)
+    fun hasStrongerStateThan(other: Waypoint): Boolean = this.timesDug > other.timesDug || (this.userInteractedWith && !other.userInteractedWith)
 
     fun carryOverState(other: Waypoint) {
         val otherTimesDug = other.timesDug
@@ -69,10 +65,6 @@ class Waypoint(
 
         if (otherInteractedWith && !this.userInteractedWith) {
             this.userInteractedWith = true
-        }
-
-        if (other.confirmedBySpade && !this.confirmedBySpade) {
-            this.confirmedBySpade = true
         }
     }
 

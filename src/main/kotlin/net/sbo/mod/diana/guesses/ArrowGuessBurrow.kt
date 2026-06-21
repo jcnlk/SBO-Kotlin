@@ -1,7 +1,5 @@
 package net.sbo.mod.diana.guesses
 
-import net.minecraft.world.InteractionHand
-import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket
 import net.minecraft.core.particles.DustParticleOptions
 import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
@@ -13,7 +11,10 @@ import net.sbo.mod.settings.categories.Diana
 import net.sbo.mod.utils.NumberUtil.roundTo
 import net.sbo.mod.utils.collection.TimeLimitedSet
 import net.sbo.mod.utils.events.annotations.SboEvent
+import net.sbo.mod.utils.events.SBOEvent
 import net.sbo.mod.utils.events.impl.diana.BurrowDugEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
 import net.sbo.mod.utils.events.impl.game.TickEvent
 import net.sbo.mod.utils.events.impl.packets.PacketReceiveEvent
 import net.sbo.mod.utils.game.InventoryUtils
@@ -83,8 +84,6 @@ object ArrowGuessBurrow {
     private val locations: MutableSet<SboVec> = Collections.newSetFromMap(ConcurrentHashMap())
 
     private var lastBlockClicked: SboVec? = null
-    private var lastAutoUseSpade: Long = 0
-    private var lastAutoUseSpadeGuess: SboVec? = null
 
     private val allGuesses = CopyOnWriteArrayList<GuessEntry>()
 
@@ -252,6 +251,12 @@ object ArrowGuessBurrow {
         }
 
         val withinRangeFirst = withinRange.getOrNull(0)
+        SBOEvent.emit(
+            DianaTargetDetectedEvent(
+                DianaTargetSource.ARROW_GUESS,
+                withinRangeFirst
+            )
+        )
 
         if (Diana.showTitleWhenFailure) {
             if (withinRangeFirst == null) {
@@ -346,37 +351,8 @@ object ArrowGuessBurrow {
         locations.clear()
         findClosestValidBlockToRayNew(arrow, this)?.let {
             WaypointManager.addArrowGuess(it)
-            tryAutoUseSpade(it)
         }
 
         return this
-    }
-
-    private fun tryAutoUseSpade(guess: SboVec) {
-        if (!Diana.autoUseSpade) return
-        if (World.getWorld() != "Hub") return
-        if (PreciseGuessBurrow.finalLocation == guess) return
-        if (lastAutoUseSpadeGuess == guess && System.currentTimeMillis() - lastAutoUseSpade < 3000) return
-        if (System.currentTimeMillis() - lastAutoUseSpade < 750) return
-
-        val client = SBOKotlin.mc
-        if (client.screen != null) return
-        val player = client.player ?: return
-        val gameMode = client.gameMode ?: return
-        val inventory = player.inventory
-        val spadeSlot = (0..8).firstOrNull { slot ->
-            val stack = inventory.getItem(slot)
-            !stack.isEmpty && stack.hoverName.string.contains("Spade")
-        } ?: return
-
-        if (inventory.selectedSlot != spadeSlot) {
-            inventory.setSelectedSlot(spadeSlot)
-            player.connection.send(ServerboundSetCarriedItemPacket(spadeSlot))
-        }
-
-        lastAutoUseSpade = System.currentTimeMillis()
-        lastAutoUseSpadeGuess = guess
-        gameMode.useItem(player, InteractionHand.MAIN_HAND)
-        player.swing(InteractionHand.MAIN_HAND)
     }
 }
