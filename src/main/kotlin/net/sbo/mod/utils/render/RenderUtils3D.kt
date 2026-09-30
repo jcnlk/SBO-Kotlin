@@ -308,19 +308,31 @@ object RenderUtils3D {
         lineWidth: Float,
         alpha: Float = 0.5f
     ) {
+        drawTracer(
+            context,
+            target.center().toVec3d().add(0.0, 0.5, 0.0),
+            color,
+            lineWidth,
+            alpha
+        )
+    }
+
+    fun drawTracer(
+        context: LevelRenderContext,
+        target: Vec3,
+        color: FloatArray,
+        lineWidth: Float,
+        alpha: Float = 0.5f
+    ) {
         val camera = context.getCamera()
 
         val startPos = camera.position()
             .add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()))
 
-        val endPos = target.center()
-            .toVec3d()
-            .add(0.0, 0.5, 0.0)
-
         drawLine(
             context,
             startPos,
-            endPos,
+            target,
             color,
             lineWidth,
             alpha

@@ -10,8 +10,11 @@ import net.sbo.mod.diana.burrows.BurrowDetector
 import net.sbo.mod.settings.categories.Diana
 import net.sbo.mod.utils.collection.TimeLimitedSet
 import net.sbo.mod.utils.events.DianaEvents
+import net.sbo.mod.utils.events.SBOEvent
 import net.sbo.mod.utils.events.annotations.SboEvent
 import net.sbo.mod.utils.events.impl.diana.BurrowDugEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
 import net.sbo.mod.utils.events.impl.game.TickEvent
 import net.sbo.mod.utils.events.impl.packets.PacketReceiveEvent
 import net.sbo.mod.utils.game.InventoryUtils
@@ -452,7 +455,8 @@ object ArrowGuessBurrow {
         if(!recentFoundArrows.add(arrow)) return this
 
         locations.clear()
-        findClosestValidBlockToRayNew(arrow, this)
+        val target = findClosestValidBlockToRayNew(arrow, this)
+        SBOEvent.emit(DianaTargetDetectedEvent(DianaTargetSource.ARROW_GUESS, target))
 
         return this
     }

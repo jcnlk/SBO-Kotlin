@@ -18,6 +18,7 @@
 
 - [Installation](#installation)
 - [Features](#features)
+  - [Cheat Features](#cheat-features)
   - [Diana Burrows](#diana-burrows)
   - [Diana Warp](#diana-warp)
   - [Diana Trackers](#diana-trackers)
@@ -61,6 +62,16 @@ Before you begin, you need to have a few things installed:
 ---
 
 ## Features
+
+### Cheat Features
+
+| Feature | Description |
+|---------|-------------|
+| **Auto Warp** | Warp automatically to the best available location for a rare mob or burrow guess |
+| **Auto Use Spade** | Select and use an Ancestral Spade when an arrow guess fails |
+| **Auto Sphinx** | Answer Sphinx riddles as soon as the solver reads all answer choices |
+| **Rare Mob Glow Through Walls** | Keep rare mob glow visible through walls |
+| **Rare Mob Tracers** | Draw tracer lines to King Minos, Minos Inquisitor, Manticore, and Sphinx using their configured glow colors |
 
 ### Diana Burrows
 

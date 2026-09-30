@@ -23,6 +23,9 @@ import net.sbo.mod.utils.SoundHandler.playCustomSound
 import net.sbo.mod.utils.chat.Chat
 import net.sbo.mod.utils.data.DataManager
 import net.sbo.mod.utils.events.Register
+import net.sbo.mod.utils.events.SBOEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
+import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
 import net.sbo.mod.utils.game.World
 import net.sbo.mod.utils.math.SboVec
 import net.sbo.mod.utils.render.RenderUtils3D
@@ -516,6 +519,7 @@ object WaypointManager {
         val waypoint = Waypoint("$mobDisplayName$owner", pos.x, pos.y, pos.z, type = "rareMob", ttl = 45)
 
         addWaypoint(waypoint)
+        SBOEvent.emit(DianaTargetDetectedEvent(DianaTargetSource.RARE_MOB, waypoint.pos))
         return waypoint
     }
 
@@ -969,7 +973,7 @@ object WaypointManager {
         }
     }
 
-    private var tryWarp: Boolean = false
+    internal var tryWarp: Boolean = false
 
     private fun executeWarpCommand(warp: String) {
         if (World.getWorld() != "Hub" || !Helper.hasSpade) return

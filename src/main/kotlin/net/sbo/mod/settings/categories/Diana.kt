@@ -37,6 +37,10 @@ object Diana : CategoryKt("Diana") {
         }
     }
 
+    enum class SphinxSolverMode {
+        AUTO, MANUAL
+    }
+
     enum class Tracker {
         OFF, TOTAL, EVENT, SESSION;
 
@@ -141,6 +145,16 @@ object Diana : CategoryKt("Diana") {
     var allowedWarps by select(AdditionalHubWarps.WIZARD, AdditionalHubWarps.DA, AdditionalHubWarps.CASTLE) {
         this.name = Literal("Add Warps")
         this.description = Literal("Select the warps you want to be able to warp to with the guess and inquisitor warp keys.")
+    }
+
+    var autoWarp by boolean(false) {
+        this.name = Literal("Auto Warp")
+        this.description = Literal("Automatically warps to the best Diana warp when a rare mob or burrow guess should be warped to.")
+    }
+
+    var autoUseSpade by boolean(false) {
+        this.name = Literal("Auto Use Spade")
+        this.description = Literal("Uses an Ancestral Spade if the arrow guess fails. If Auto Warp is enabled, it waits briefly for the spade result before choosing a warp.")
     }
 
     var showTitleWhenWarpAvailable by boolean(false) {
@@ -497,6 +511,16 @@ object Diana : CategoryKt("Diana") {
         this.description = Literal("Highlights rare mobs (King, Manti, Sphinx, Inq) with a glowing effect.")
     }
 
+    var HighlightDepthCheck by boolean(true) {
+        this.name = Literal("Highlight Depth Check")
+        this.description = Literal("Only highlights rare mobs when they are visible. Disable this to see the glow through walls.")
+    }
+
+    var RareMobTracers by boolean(false) {
+        this.name = Literal("Rare Mob Tracers")
+        this.description = Literal("Draws tracer lines to rare mobs (King, Manti, Sphinx, Inq) using their configured glow colors.")
+    }
+
     var announceInqText by strings("") {
         this.name = Literal("Send Text On Inq Spawn")
         this.description = Literal("Sends a text on Inq spawn 5 seconds after spawn, use {since} for mobs since mob, {chance} for mob chance. Leave empty to disable.")
@@ -578,6 +602,11 @@ object Diana : CategoryKt("Diana") {
             "Helps you solve the sphinx riddle by showing you the answer choices in chat and it automatically clicks the correct one for you when you click anywhere while the chat is open.\n" +
                 "Theres also the option to us a keybind in the mc keybinds menu but §c⚠ USE AT YOUR OWN RISK ⚠"
         )
+    }
+
+    var sphinxSolverMode by enum(SphinxSolverMode.MANUAL) {
+        this.name = Literal("Sphinx Solver Mode")
+        this.description = Literal("Auto answers the Sphinx riddle immediately. Manual keeps the click-to-answer and keybind behavior.")
     }
 
 }
