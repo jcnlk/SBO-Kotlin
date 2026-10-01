@@ -1,6 +1,9 @@
 package net.sbo.mod.mixin;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.sbo.mod.diana.automation.DianaAutomation;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -16,6 +19,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MultiPlayerGameMode.class)
 final class PlayerInteractMixin {
+    @Inject(method = {"startDestroyBlock", "continueDestroyBlock"}, at = @At("HEAD"))
+    private void sbo$selectSpadeForBurrow(BlockPos pos, Direction direction, CallbackInfoReturnable<Boolean> cir) {
+        DianaAutomation.INSTANCE.switchToSpadeForBurrow(pos);
+    }
+
+    @Inject(method = "destroyBlock", at = @At("RETURN"))
+    private void sbo$restoreAfterBurrowBreak(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValueZ()) {
+            DianaAutomation.INSTANCE.onBurrowBlockBroken(pos);
+        }
+    }
+
     @Inject(method = "useItem", at = @At("HEAD"), cancellable = true)
     private final void sbo$onInteractItem(@NonNull final CallbackInfoReturnable<InteractionResult> cir) {
         final var player = Minecraft.getInstance().player;

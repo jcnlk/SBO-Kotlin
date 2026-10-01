@@ -11,6 +11,7 @@ import net.minecraft.resources.Identifier
 import net.minecraft.util.Util
 import net.sbo.mod.compat.IrisCompatibility
 import net.sbo.mod.diana.DianaMobDetect
+import net.sbo.mod.diana.automation.SpadeDiagnostics
 import net.sbo.mod.diana.DianaTracker
 import net.sbo.mod.diana.RareMobHighlight
 import net.sbo.mod.diana.MuteBuggedSpadeSounds
@@ -80,6 +81,7 @@ object SBOKotlin : ClientModInitializer {
 			.orElse("unknown")!!
 
 		logger.info("Initializing SBO, version: $version...")
+        SpadeDiagnostics.init()
 
 		// Initialize Mayor Data
 		Mayor.init()

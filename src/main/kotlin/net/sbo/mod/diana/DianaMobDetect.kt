@@ -22,6 +22,8 @@ import net.sbo.mod.utils.events.annotations.SboEvent
 import net.sbo.mod.utils.events.impl.entity.DianaMobDeathEvent
 import net.sbo.mod.utils.events.impl.entity.EntityLoadEvent
 import net.sbo.mod.utils.events.impl.entity.EntityUnloadEvent
+import net.sbo.mod.utils.events.impl.game.WorldChangeEvent
+import net.sbo.mod.utils.math.SboVec
 import net.sbo.mod.utils.overlay.Overlay
 import net.sbo.mod.utils.overlay.OverlayExamples
 import net.sbo.mod.utils.overlay.OverlayTextLine
@@ -43,6 +45,62 @@ object DianaMobDetect {
     private val tracked = mutableMapOf<Int, ArmorStand>()
     private val defeated = mutableSetOf<Int>()
     private val warned = mutableSetOf<Int>()
+
+    private data class OwnRareMob(
+        val type: RareDianaMob,
+        val spawnPos: SboVec,
+        val spawnedAtNs: Long = System.nanoTime(),
+        var entity: ArmorStand? = null
+    )
+
+    private val ownRareMobs = mutableListOf<OwnRareMob>()
+
+    internal fun livingMythologicalMobs(): List<ArmorStand> {
+        val level = mc.level ?: return emptyList()
+        return level.entitiesForRendering().filterIsInstance<ArmorStand>().filter { stand ->
+            val name = stand.customName?.formattedString().orEmpty()
+            stand.isAlive && (isKingHitPhase(name) ||
+                hasMythoMobTypeChar(name) && (parseHealthFromName(name) ?: 1.0) > 0.0)
+        }
+    }
+
+    fun hasActiveOwnRareMob(): Boolean {
+        val level = mc.level ?: return false
+        val now = System.nanoTime()
+        ownRareMobs.removeAll { mob ->
+            if (mob.entity == null) {
+                mob.entity = level.entitiesForRendering().asSequence()
+                    .filterIsInstance<ArmorStand>()
+                    .filter { stand ->
+                        val name = stand.customName?.formattedString().orEmpty()
+                        val matchesMob = if (isKingHitPhase(name)) {
+                            mob.type == RareDianaMob.KING
+                        } else {
+                            hasMythoMobTypeChar(name) && RareDianaMob.fromName(name) == mob.type
+                        }
+                        stand.isAlive && matchesMob &&
+                            (parseHealthFromName(name) ?: 1.0) > 0.0 &&
+                            ownRareMobs.none { it.entity === stand } &&
+                            mob.spawnPos.distanceTo(stand.x, stand.y, stand.z) <= 16.0
+                    }
+                    .minByOrNull { mob.spawnPos.distanceTo(it.x, it.y, it.z) }
+            }
+            val entity = mob.entity
+            if (entity == null) {
+                now - mob.spawnedAtNs > TimeUnit.SECONDS.toNanos(5)
+            } else {
+                val name = entity.customName?.formattedString().orEmpty()
+                !entity.isAlive || entity.level() !== level ||
+                    (!isKingHitPhase(name) && (parseHealthFromName(name) ?: 1.0) <= 0.0)
+            }
+        }
+        return ownRareMobs.isNotEmpty()
+    }
+
+    @SboEvent
+    fun onWorldChange(event: WorldChangeEvent) {
+        ownRareMobs.clear()
+    }
 
     private val mobHpOverlay: Overlay = Overlay(name = "mythosMobHp", x = 10f, y = 10f, exampleView = OverlayExamples.mythosMobHpExample).setCondition { Diana.mythosMobHp }
     private val noShurikenOverlay: Overlay = Overlay(name = "noShuriken", x = 10f, y = 10f, scale = 3f, exampleView = OverlayExamples.dianaStarlessMobExample).setCondition { Diana.noShurikenOverlay }
@@ -134,6 +192,7 @@ object DianaMobDetect {
             val cleanName = name.removeFormatting()
 
             val rare = RareDianaMob.fromName(cleanName)
+            if (rare != null) ownRareMobs.removeAll { it.type == rare }
             val displayName =
                 rare?.display ?: fallbackRemovePrefix(cleanName) // rare.display returns already without prefix; otherwise the fallback would remove the prefix
 
@@ -154,6 +213,7 @@ object DianaMobDetect {
         }
 
         Register.onTick(1) {
+            hasActiveOwnRareMob()
             val world = mc.level ?: return@onTick
             val player = mc.player ?: return@onTick
             val overlayLines = mutableListOf<OverlayTextLine>()
@@ -318,7 +378,12 @@ object DianaMobDetect {
         }
     }
 
-    fun onRareSpawn(mob: String) {
+    fun onRareSpawn(mob: String, fromCocoon: Boolean = false) {
+        if (!fromCocoon) {
+            RareDianaMob.fromName(mob)?.let { type ->
+                ownRareMobs.add(OwnRareMob(type, SboPlayer.getLastPosition().copy()))
+            }
+        }
         val mobType: Diana.ReceiveList = when (mob) {
             RareDianaMob.INQ.display -> Diana.ReceiveList.INQ
             RareDianaMob.KING.display -> Diana.ReceiveList.KING

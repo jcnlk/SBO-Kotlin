@@ -15,6 +15,12 @@ import org.spongepowered.asm.mixin.transformer.IMixinTransformer
 class MixinTest {
 
     @Test
+    fun `slot diagnostics hook is actually applied`() {
+        val inventory = Class.forName("net.minecraft.world.entity.player.Inventory")
+        Assertions.assertTrue(inventory.declaredMethods.any { it.name.contains("sbo\$traceSlotChange") })
+    }
+
+    @Test
     fun `mixins load successfully`() {
         val environment = MixinEnvironment.getCurrentEnvironment()
         Assertions.assertInstanceOf(IMixinTransformer::class.java, environment.activeTransformer)

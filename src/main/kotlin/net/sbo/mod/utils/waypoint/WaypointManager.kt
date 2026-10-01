@@ -816,7 +816,7 @@ object WaypointManager {
 
     fun getAllGuessesAndBurrows(): List<Waypoint> = getWaypointsOfType("burrow") + getWaypointsOfType("arrow") + getWaypointsOfType("guess")
 
-    private fun getBestGuess(): Waypoint? = getBestGuessAt(Player.getLastPosition())
+    internal fun getBestGuess(): Waypoint? = getBestGuessAt(Player.getLastPosition())
 
     private fun getBestGuessAt(pos: SboVec): Waypoint? {
         return getAllGuessesAndBurrows()

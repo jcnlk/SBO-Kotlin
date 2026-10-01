@@ -1,6 +1,7 @@
 package net.sbo.mod.diana
 
 import net.sbo.mod.diana.achievements.AchievementManager
+import net.sbo.mod.diana.automation.DianaAutomation
 import net.sbo.mod.diana.achievements.AchievementManager.trackMagicFind
 import net.sbo.mod.diana.achievements.AchievementManager.unlockAchievement
 import net.sbo.mod.overlays.DianaLoot
@@ -216,12 +217,13 @@ object DianaTracker {
     }
 
     private fun onMobSpawn(mob: String, fromCocoon: Boolean = false) {
+        if (!fromCocoon) DianaAutomation.onOwnMobSpawn(mob)
         lastSpawnedMob = mob
         lastSpawnedMobTime = System.nanoTime()
         //if (fromCocoon) Chat.chat("§6[SBO] §eRegistered cocooned mob: $mob")
         when (mob) {
             "King Minos" -> {
-                DianaMobDetect.onRareSpawn(mob)
+                DianaMobDetect.onRareSpawn(mob, fromCocoon)
                 trackMob(mob, 1)
 
                 sboData.kingSinceWool += 1
@@ -249,7 +251,7 @@ object DianaTracker {
                 sboData.mobsSinceKing = 0
             }
             "Manticore" -> {
-                DianaMobDetect.onRareSpawn(mob)
+                DianaMobDetect.onRareSpawn(mob, fromCocoon)
                 trackMob(mob, 1)
 
                 sboData.mantiSinceCore += 1
@@ -279,7 +281,7 @@ object DianaTracker {
                 sboData.mobsSinceManti = 0
             }
             "Minos Inquisitor" -> {
-                DianaMobDetect.onRareSpawn(mob)
+                DianaMobDetect.onRareSpawn(mob, fromCocoon)
                 trackMob(mob, 1)
 
                 sboData.inqsSinceChim += 1
@@ -307,7 +309,7 @@ object DianaTracker {
                 sboData.mobsSinceInq = 0
             }
             "Sphinx" -> {
-                DianaMobDetect.onRareSpawn(mob)
+                DianaMobDetect.onRareSpawn(mob, fromCocoon)
                 trackMob(mob, 1)
 
                 sboData.sphinxSinceFood += 1

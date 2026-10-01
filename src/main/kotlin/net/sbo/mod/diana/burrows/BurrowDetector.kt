@@ -2,6 +2,7 @@ package net.sbo.mod.diana.burrows
 
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.sbo.mod.diana.guesses.ArrowGuessBurrow
+import net.sbo.mod.diana.automation.DianaAutomation
 import net.sbo.mod.settings.categories.Diana
 import net.sbo.mod.settings.categories.Debug
 import net.sbo.mod.utils.Helper
@@ -129,8 +130,9 @@ object BurrowDetector {
             lastDugOutBurrowPos = DianaEvents.lastWaypointClicked ?: SboVec.ZERO
             refreshBurrows(deathOriginating = false, expectedTimesDug = 2)
 
-            val anyClose = WaypointManager.getAllGuessesAndBurrows().filter { it.distanceToPlayer() < 90 }
-            if (Diana.showTitleWhenChainEnds && anyClose.isEmpty()) requestSpade("chain")
+            val hasNext = if (Diana.autoWarp) WaypointManager.getBestGuess() != null
+                else WaypointManager.getAllGuessesAndBurrows().any { it.distanceToPlayer() < 90 }
+            if (Diana.showTitleWhenChainEnds && !hasNext) requestSpade("chain")
         }
 
         Register.onChatMessage(Regex(""".*§eYou (?:just )?dug out(?!.*\(\d+/\d+\)$).*""")) { message, matchResult ->
@@ -233,6 +235,7 @@ object BurrowDetector {
 
         pendingUseSpadeTitle = "§${color}Use Spade!"
         Chat.chat("§6[SBO] §${color}Use spade!", true)
+        DianaAutomation.onSpadeRequested()
     }
 
     fun removeFromInternalState(pos: SboVec) {
@@ -242,6 +245,7 @@ object BurrowDetector {
 
     @SboEvent
     fun onBurrowDug(event: BurrowDugEvent) {
+        DianaEvents.lastWaypointClicked?.let(DianaAutomation::onBurrowDigConfirmed)
         when {
             event.currentBurrow == 1 -> chainStart()
 
@@ -266,6 +270,7 @@ object BurrowDetector {
         if (packet.particle.type == MCParticleTypes.LARGE_SMOKE && packet.maxSpeed == 0.01f && packet.xDist == 0.0f && packet.yDist == 0.0f && packet.zDist == 0.0f) {
             val pos = SboVec(packet.x, packet.y, packet.z).roundLocationToBlock().down()
 
+            DianaAutomation.onBurrowDigConfirmed(pos)
             markRecentlyRemoved(pos)
             removeFromInternalState(pos)
 
@@ -356,6 +361,8 @@ object BurrowDetector {
 
     private fun refreshBurrows(deathOriginating: Boolean, expectedTimesDug: Int, burrowType: String? = null) {
         val pos = lastDugOutBurrowPos
+        DianaAutomation.onBurrowDigConfirmed(pos)
+        if (expectedTimesDug >= 2 || deathOriginating) DianaAutomation.onMobBurrowCompleted(pos)
 
         val knownWaypoint = WaypointManager.getWaypointAt(pos, "burrow")
 
@@ -420,6 +427,10 @@ object BurrowDetector {
 
             markRecentlyRemoved(dugWaypoint.pos)
             WaypointManager.removeWaypoint(dugWaypoint)
+        }
+
+        if (!deathOriginating && (expectedTimesDug >= 2 || dugWaypoint?.text == "Start")) {
+            DianaAutomation.onBurrowCompleted()
         }
     }
 }

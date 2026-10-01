@@ -149,12 +149,17 @@ object Diana : CategoryKt("Diana") {
 
     var autoWarp by boolean(false) {
         this.name = Literal("Auto Warp")
-        this.description = Literal("Automatically warps to the best Diana warp when a rare mob or burrow guess should be warped to.")
+        this.description = Literal("Automatically warps to the best Diana warp for rare mobs and burrows. After completing a burrow, chooses the closest known target across all active chains, including new Start burrows.")
+    }
+
+    var autoSwitchSpade by boolean(true) {
+        this.name = Literal("Auto Switch Spade")
+        this.description = Literal("Switches to your best hotbar spade when mining a known Diana burrow or guess, then restores your previous slot when the dig is confirmed or you aim away. Manually selecting another slot cancels the restore.")
     }
 
     var autoUseSpade by boolean(false) {
         this.name = Literal("Auto Use Spade")
-        this.description = Literal("Uses an Ancestral Spade if the arrow guess fails. If Auto Warp is enabled, it waits briefly for the spade result before choosing a warp.")
+        this.description = Literal("Uses the best Diana spade in your hotbar, including the Erudite bonus, and respects its ability cooldown. Uses known chains first with Auto Warp, then uses the spade when a new target is needed or the Use Spade prompt appears.")
     }
 
     var showTitleWhenWarpAvailable by boolean(false) {
