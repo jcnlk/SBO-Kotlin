@@ -1,6 +1,7 @@
 package net.sbo.mod.diana.burrows
 
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.sbo.mod.diana.automation.DianaAutomation
 import net.sbo.mod.diana.guesses.ArrowGuessBurrow
 import net.sbo.mod.settings.categories.Diana
 import net.sbo.mod.settings.categories.Debug
@@ -240,6 +241,7 @@ object BurrowDetector {
 
         pendingUseSpadeTitle = "§${color}Use Spade!"
         Chat.chat("§6[SBO] §${color}Use spade!", true)
+        DianaAutomation.handleFailedArrowGuess()
     }
 
     fun removeFromInternalState(pos: SboVec) {
