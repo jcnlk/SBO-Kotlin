@@ -54,7 +54,7 @@ object Diana : Category("Diana") {
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Burrows"
             this.description = "You should keep all of these On for the optimal experience. Without the Arrow Guess, your rates will be much worse, and without the Close Burrow Detection your burrows will not turn into Mob/Treasure/Start burrows when getting close and holding a spade, and it will also make your experience and rates worse."
         }
@@ -79,7 +79,7 @@ object Diana : Category("Diana") {
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Burrows Preferences"
         }
     }
@@ -91,6 +91,7 @@ object Diana : Category("Diana") {
 
     var showTextOnSubGuess by boolean(false) {
         this.name = Literal("Show Text On Sub Guess")
+        depends(::showArrowSubGuesses)
         this.description = Literal("Shows \"Possible\" text on sub guesses in addition to the block higlight. Might increase visual clutter in exchange of making subguesses more visible.")
     }
 
@@ -106,6 +107,7 @@ object Diana : Category("Diana") {
 
     var beamDistance by int(8) {
         this.name = Literal("Beacon Beam Distance")
+        depends(::showBeaconBeam)
         this.description = Literal("Hide the beam when this many blocks or more close to it.")
     }
 
@@ -131,11 +133,12 @@ object Diana : Category("Diana") {
 
     var simpleChainsOverlayMode by boolean(true) {
         this.name = Literal("Simple Chains Overlay Mode")
+        depends(::ongoingChainsDisplay)
         this.description = Literal("Only shows Pending Start and Active waypoint amount, never showing internal state mismatch issues aimed at users that want to troubleshoot/debug mod issues.")
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Warp"
             this.description = "You must configure the warp keys from vanilla Minecraft settings, under (ESC) -> Options -> Controls -> Key Binds... scroll till you find SBO - Keybinds and configure it from there."
         }
@@ -185,7 +188,7 @@ object Diana : Category("Diana") {
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Tracker"
         }
     }
@@ -260,6 +263,7 @@ object Diana : Category("Diana") {
     var hideUnobtainedItems by ObservableEntry(
         boolean(true) {
             this.name = Literal("Hide Unobtained Items")
+            dependsAny(state(::mobTracker, "on") { it != Tracker.OFF }, state(::lootTracker, "on") { it != Tracker.OFF })
             this.description = Literal("Hides any loot or mob lines that have not been tracked yet (value is 0) to reduce clutter in the overlays.")
         }
     ) { old, new ->
@@ -276,6 +280,7 @@ object Diana : Category("Diana") {
     var combineLootLines by ObservableEntry(
         boolean(false) {
             this.name = Literal("Combine LS Loot")
+            depends(state(::lootTracker, "on") { it != Tracker.OFF })
             this.description = Literal("Combines the base item and the Loot Share (LS) variant into a single line. The individual LS count is shown on hover.")
         }
     ) { old, new ->
@@ -299,6 +304,7 @@ object Diana : Category("Diana") {
 
     var hideLsStats by ObservableEntry(boolean(false) {
             this.name = Literal("Hide LS Stats")
+            dependsAny(state(::mobTracker, "on") { it != Tracker.OFF }, on(::statsTracker))
             this.description = Literal("Hides the Loot Share (LS) portion of the Diana stats lines.")
         }
     ) { old, new ->
@@ -327,13 +333,18 @@ object Diana : Category("Diana") {
         this.description = Literal("Sends the chat Message with stat: [SBO] Took 120 Mobs to get a Inquis!")
     }
 
+    var sendKillTimeMessage by boolean(true) {
+        this.name = Literal("Mob Kill Time Message")
+        this.description = Literal("Sends a chat message with how long it took to kill a rare Diana mob you spawned.")
+    }
+
     var bazaarSettingDiana by enum(SettingDiana.SELLOFFER) {
         this.name = Literal("Bazaar Setting")
         this.description = Literal("Bazaar setting to set the price for loot.")
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Announcer"
         }
     }
@@ -413,7 +424,7 @@ object Diana : Category("Diana") {
     }
 
     init {
-        separator {
+        sub {
             this.title = "Rare Mob Title Timings"
             this.description = "Customize fade-in, display and fade-out ticks for Rare Mob titles."
         }
@@ -441,7 +452,7 @@ object Diana : Category("Diana") {
     }
 
     init {
-        separator {
+        sub {
             this.title = "Diana Waypoints"
             this.description =  "§bDisable View Bobbing in controls if lines are buggy."
         }
@@ -461,11 +472,12 @@ object Diana : Category("Diana") {
         this.range = 1..20
         this.slider = true
         this.name = Literal("Diana Line Width")
+        dependsAny(::guessAndBurrowLine, ::inqLine)
         this.description = Literal("The width of the lines drawn for Diana waypoints.")
     }
 
     init {
-        separator {
+        sub {
             this.title = "Rare Mobs"
         }
     }
@@ -477,11 +489,13 @@ object Diana : Category("Diana") {
 
     var shareRareMobInPublicChat by boolean(false) {
         this.name = Literal("Share Rare-Mob in Public Chat")
+        depends(::shareRareMob)
         this.description = Literal("Send rare mob coordinates to public chat instead of party chat.")
     }
 
     var ShareMobs by select(ShareList.INQ, ShareList.MANTICORE, ShareList.KING, ShareList.SPHINX) {
         this.name = Literal("Select which Mobs to Share")
+        depends(::shareRareMob)
         this.description = Literal("Select which mobs to share.")
     }
 
@@ -497,6 +511,7 @@ object Diana : Category("Diana") {
 
     var ReceiveMobs by select(ReceiveList.INQ, ReceiveList.MANTICORE, ReceiveList.KING, ReceiveList.SPHINX) {
         this.name = Literal("Which Mobs to Receive")
+        depends(::receiveRareMob)
         this.description = Literal("Select which mobs to receive.")
     }
 
@@ -513,6 +528,22 @@ object Diana : Category("Diana") {
     var RareMobTracers by boolean(false) {
         this.name = Literal("Rare Mob Tracers")
         this.description = Literal("Draws tracer lines to rare mobs (King, Manti, Sphinx, Inq) using their configured glow colors.")
+    }
+
+    var lootshareDisplay by boolean(true) {
+        this.name = Literal("Lootshare Display")
+        this.description = Literal("In a party, shows Lootshared above rare mobs you did not spawn. Grey and struck through until you hit 1% of its max HP, then aqua.")
+    }
+
+    var lootshareMessage by boolean(true) {
+        this.name = Literal("Lootshare Message")
+        this.description = Literal("Sends a party chat message once you dealt enough damage to lootshare a rare mob.")
+    }
+
+    var lootsharePartyOverlay by boolean(false) {
+        this.name = Literal("Lootshare Party Overlay")
+        this.description = Literal("While a rare mob is around, lists your party in red until they sent the SBO lootshare message, then aqua. /sboguis to move it.")
+        depends(::lootshareDisplay, ::lootshareMessage)
     }
 
     var announceInqText by strings("") {
@@ -576,18 +607,19 @@ object Diana : Category("Diana") {
 
     var NoShurikenMobs by select(NoShurikenList.INQ, NoShurikenList.MANTICORE, NoShurikenList.KING, NoShurikenList.SPHINX) {
         this.name = Literal("Select which Mobs to Check")
+        depends(::noShurikenOverlay)
         this.description = Literal("Select which mobs to check for shuriken.")
     }
 
     init {
-        separator {
+        sub {
             this.title = "Other"
         }
     }
 
     var mythosMobHp by boolean(true) {
-        this.name = Literal("Mythos Mob HP")
-        this.description = Literal("Displays HP of mythological mobs near you, /sboguis to move it.")
+        this.name = Literal("Mythos Mob Infos")
+        this.description = Literal("Displays HP and your lootshare status of mythological mobs near you, /sboguis to move it.")
     }
 
     var sphinxSolver by boolean(true) {

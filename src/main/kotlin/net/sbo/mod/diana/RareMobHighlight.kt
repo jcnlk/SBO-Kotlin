@@ -16,7 +16,7 @@ import net.sbo.mod.utils.events.impl.entity.EntityLoadEvent
 import net.sbo.mod.utils.events.impl.entity.EntityUnloadEvent
 import net.sbo.mod.utils.render.RenderUtils3D
 import java.awt.Color
-import java.util.concurrent.ConcurrentHashMap
+import java.util.HashMap
 import java.util.concurrent.TimeUnit
 //#if MC > 26.1
 //$$ import net.minecraft.util.ARGB
@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit
 object RareMobHighlight {
     private val NAME_CHECK_TIMEOUT_NS = TimeUnit.SECONDS.toNanos(1L)
 
-    private val rareMobs = ConcurrentHashMap<LivingEntity, RareDianaMob>()
-    private val pendingMobs = ConcurrentHashMap<LivingEntity, Long>()
+    private val rareMobs = mutableMapOf<LivingEntity, RareDianaMob>()
+    private val pendingMobs = mutableMapOf<LivingEntity, Long>()
 
     fun init() {
         Register.onTick(4) {

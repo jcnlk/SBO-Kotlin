@@ -184,7 +184,11 @@ object DianaAutomation {
         lastAutoUseSpadeNs = now
         lastAirSpadeUseNs = now
         gameMode.useItem(player, InteractionHand.MAIN_HAND)
+        //#if MC > 26.2
+        //$$ player.swing(InteractionHand.MAIN_HAND, player.mainHandItem.interactAnimation, false)
+        //#else
         player.swing(InteractionHand.MAIN_HAND)
+        //#endif
         return true
     }
 

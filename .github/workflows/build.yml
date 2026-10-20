@@ -73,3 +73,13 @@ jobs:
           archive: false
           if-no-files-found: error
           retention-days: 90
+
+      - name: Upload 26.3 JAR
+        if: ${{ !cancelled() && (github.event_name != 'pull_request' || failure()) }}
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: sbo-26.3-fabric
+          path: build/versions/SBO-*+26.3-fabric.jar
+          archive: false
+          if-no-files-found: error
+          retention-days: 90
