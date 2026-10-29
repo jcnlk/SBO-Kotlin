@@ -1,13 +1,23 @@
 version: 2
+# Renovate handles dependency PRs, including security fixes.
+# These exclusions leave Dependabot alerts and the dependency graph enabled.
+# The explicit version range also excludes security updates.
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
-    target-branch: "Diana-V2"
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+        versions: [">= 0"]
 
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "daily"
-    target-branch: "Diana-V2"
+      interval: "weekly"
+    open-pull-requests-limit: 0
+    # Dependabot cannot resolve the property-based versions or Minecraft libraries.
+    ignore:
+      - dependency-name: "*"
+        versions: [">= 0"]

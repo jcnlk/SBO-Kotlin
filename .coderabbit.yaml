@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: "Keep feedback concise and actionable. Prioritize correctness, security, and Minecraft version compatibility. Explain the concrete failure behind each finding."
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0
+    drafts: false
+    ignore_usernames: []
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+  path_instructions:
+    - path: "src/**"
+      instructions: |
+        This is a Fabric client mod targeting Minecraft 26.1.2, 26.2, and 26.3 through Deftu's multiversion preprocessor and Bloom.
+        Interpret //#if directives, the node links in root.gradle.kts, and Bloom replacements in build.gradle.kts before evaluating version-specific code.
+        Check event cancellation and priority, render state, client-thread access, and behavior across all three Minecraft targets.
+        Treat saved settings, Diana trackers, and cloud synchronization as persistent user data; check migration and backup behavior when formats change.
+    - path: "event-processor/**"
+      instructions: |
+        This KSP processor generates event registrations from @SboEvent annotations for the shared source tree.
+        Check generated registrations, handler signatures, event priorities, and incremental processing across the three Minecraft targets.
+    - path: "gradle.properties"
+      instructions: |
+        Version-specific dependencies live together in this file, with Minecraft target suffixes on the property keys.
+        Check Fabric API, hm-api, and RenderChest Minecraft suffixes; Mod Menu majors 18, 20, and 21 correspond to targets 26.1.2, 26.2, and 26.3.
+        Iris and Sodium properties contain only the library version; build.gradle.kts adds the Minecraft and Fabric qualifiers.
+        GuiLib uses one shared version for three target-specific Maven artifacts; verify that all three artifacts exist.
+        Fabric Loader's compile version and minimum runtime constraint are intentionally separate. Check Fabric Kotlin and Kotlin plugin compatibility.
+    - path: "**/*.gradle*"
+      instructions: |
+        Account for Deftu multiversion preprocessing, Bloom replacements, the shared source tree, and the KSP event-processor subproject.
+        Minecraft targets and event-processor compile to Java 25; CI runs Gradle on Java 27.
+        Verify that ./gradlew build still builds and tests all three targets and writes their JARs to build/versions/.
+        The mixinTest task audits mixins through Fabric Loader separately from the ordinary unit tests.
+    - path: "renovate.json"
+      instructions: |
+        Custom regex managers own the annotated dependency properties; depType identifies the Minecraft target within the shared gradle.properties file.
+        Preserve Minecraft and Fabric compatibility filters, manual Fabric Loader and Java updates, and Forgejo artifact protocol compatibility.
+    - path: ".github/workflows/**"
+      instructions: |
+        Review event and path filters, token permissions, cache trust, and pinned action references.
+        The Build workflow builds all three Minecraft targets and distributes their JARs through GitHub Actions artifacts.
+    - path: ".forgejo/workflows/**"
+      instructions: |
+        Review Forgejo event filters, context expressions, runner compatibility, cache trust, and action references.
+        The Forgejo Build workflow builds all three targets and uploads their JARs with the Forgejo v4 artifact protocol.
