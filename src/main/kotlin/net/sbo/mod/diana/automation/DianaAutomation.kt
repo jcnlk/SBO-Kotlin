@@ -4,7 +4,8 @@ import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.ItemStack
 import net.sbo.mod.SBOKotlin
-import net.sbo.mod.settings.categories.Diana
+import net.sbo.mod.settings.categories.Burrows
+import net.sbo.mod.settings.categories.Warps
 import net.sbo.mod.utils.events.annotations.SboEvent
 import net.sbo.mod.utils.events.impl.diana.DianaTargetDetectedEvent
 import net.sbo.mod.utils.events.impl.diana.DianaTargetSource
@@ -56,13 +57,13 @@ object DianaAutomation {
 
     private fun handleTargetDetected(event: DianaTargetDetectedEvent) {
         if (World.getWorld() != "Hub") return
-        if (Diana.autoWarp && pendingTarget?.source == DianaTargetSource.RARE_MOB &&
+        if (Warps.autoWarp && pendingTarget?.source == DianaTargetSource.RARE_MOB &&
             event.source != DianaTargetSource.RARE_MOB) return
         if (event.source == DianaTargetSource.ARROW_GUESS && event.pos == null) {
             handleFailedArrowGuess()
             return
         }
-        if (!Diana.autoWarp) return
+        if (!Warps.autoWarp) return
 
         when (event.source) {
             DianaTargetSource.RARE_MOB -> {
@@ -76,8 +77,8 @@ object DianaAutomation {
     }
 
     fun handleFailedArrowGuess() {
-        if (!Diana.autoUseSpade || !Diana.spadeGuess) return
-        if (useSpade() && Diana.autoWarp) {
+        if (!Warps.autoUseSpade || !Burrows.spadeGuess) return
+        if (useSpade() && Warps.autoWarp) {
             spadeFallback = SpadeFallback(System.nanoTime())
         }
     }
@@ -104,7 +105,7 @@ object DianaAutomation {
 
     @SboEvent
     fun onTick(event: TickEvent) {
-        if (!Diana.autoWarp || World.getWorld() != "Hub") {
+        if (!Warps.autoWarp || World.getWorld() != "Hub") {
             pendingTarget = null
             spadeFallback = null
             return

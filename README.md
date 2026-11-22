@@ -65,7 +65,7 @@ Before you begin, you need to have a few things installed:
 
 ### Cheat Features
 
-These options are in the Diana settings. Automation and tracers are disabled by default.
+Auto Warp and Auto Use Spade are in the Warps settings, the Sphinx and rare mob options in the Rare Mobs settings. Automation and tracers are disabled by default.
 
 | Feature | Description |
 |---------|-------------|
